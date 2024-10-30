@@ -28,10 +28,6 @@ function Install-NuGetCli {
         [string] $sourceNuGetExe = "https://dist.nuget.org/win-x86-commandline/v5.3.1/nuget.exe"
     )
 
-    if (!(Get-IsWindows)) {
-        EnsureCommandIsAvailable "mono"
-    }
-
     if (-not $(Test-Path $ToolsPath)) {
         mkdir $ToolsPath | Out-Null
     }
@@ -102,8 +98,7 @@ function Get-NugetPackage {
     | Where-Object { $_."@type" -like "PackageBaseAddress*" } `
     | Select-Object -Property "@id" -ExpandProperty "@id"
 
-    $lowerId = $PackageName.ToLower()
-    $file = "$($lowerId).$($PackageVersion)"
+    $file = "$($PackageName).$($PackageVersion)"
     $zip = "$($file).zip"
 
     New-Item -Path $OutputDirectory -Force -ItemType Directory | Out-Null
@@ -116,8 +111,14 @@ function Get-NugetPackage {
         return "$($OutputDirectory)/$($file)"
     }
 
+    $lowerId = $PackageName.ToLower()
+
     try {
         Invoke-RestMethod "$($packageService)$($lowerId)/$($PackageVersion)/$($file).nupkg" -OutFile $zip
+
+        if($ExcludeVersion) {
+            $zip = Move-Item -Path $zip -Destination "$($zip.Split($PackageVersion)[0].TrimEnd('.')).zip" -PassThru | Select-Object -ExpandProperty PSChildName
+        }
 
         Expand-Archive $zip -Force
 
@@ -130,7 +131,7 @@ function Get-NugetPackage {
         Pop-Location
     }
 
-    return Resolve-Path "$($OutputDirectory)/$($file)" | Select-Object -Last 1
+    return "$($OutputDirectory)/$($zip.TrimEnd(".zip"))"
 }
 
 # function Get-NuGetPackage {
