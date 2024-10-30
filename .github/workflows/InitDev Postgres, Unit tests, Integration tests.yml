@@ -7,12 +7,7 @@ name: InitDev Postgres, Unit tests, Integration tests
 
 run-name: ${{github.event.client_payload.branch}}
 
-on:
-  pull_request:
-   branches: [main, 'b-v*-patch*','feature-*']
-   types: [opened, synchronize, reopened, unlabeled]
-  push:
-   branches: [main, 'b-v*-patch*','feature-*']   
+on: 
   workflow_dispatch:
     inputs:
       distinct_id:
@@ -39,7 +34,7 @@ env:
 
 jobs:
   FindStandardAndExtensionVersions:
-    uses: Ed-Fi-Alliance-OSS/Ed-Fi-ODS/.github/workflows/Find Standard and Extension Versions.yml@874b608a0f3a14243e0035dd1222169fafcbe8d3
+    uses: mjaksn/Ed-Fi-ODS/.github/workflows/Find Standard and Extension Versions.yml@874b608a0f3a14243e0035dd1222169fafcbe8d3
     with:
       calling_branch: ${{ github.head_ref || github.ref_name }}
 
@@ -74,7 +69,7 @@ jobs:
     - name: Checkout Ed-Fi-ODS-Implementation
       uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
       with:
-          repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS-Implementation
+          repository: mjaksn/Ed-Fi-ODS-Implementation
           path: Ed-Fi-ODS-Implementation/
     - name: Is pull request branch exists in Ed-Fi-ODS-Implementation
       working-directory: ./Ed-Fi-ODS-Implementation/
@@ -84,7 +79,7 @@ jobs:
     - name: Checkout Ed-Fi-ODS
       uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608 # v4
       with:
-          repository: Ed-Fi-Alliance-OSS/Ed-Fi-ODS
+          repository: mjaksn/Ed-Fi-ODS
           path: Ed-Fi-ODS/
     - name: Is pull request branch exists in Ed-Fi-ODS
       working-directory: ./Ed-Fi-ODS-Implementation/
