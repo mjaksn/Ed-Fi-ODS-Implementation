@@ -70,11 +70,11 @@ function Get-NugetPackage {
     $lowerId = $PackageName.ToLower()
 
     try {
-        Invoke-RestMethod "$($packageService)$($lowerId)/$($PackageVersion)/$($file).nupkg" -OutFile "$($zip).zip"
+        Invoke-RestMethod "$($packageService)$($lowerId)/$($PackageVersion)/$($file).nupkg" -OutFile "$($zipName).zip"
 
-        Expand-Archive "$($zip).zip" -Force
+        Expand-Archive "$($zipName).zip" -Force
 
-        Remove-Item "$($zip).zip"
+        Remove-Item "$($zipName).zip"
     }
     catch {
         throw $_
