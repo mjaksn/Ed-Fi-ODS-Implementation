@@ -655,7 +655,6 @@ function New-DatabasesPackage {
             Version               = $Version
             Properties            = $Properties
             OutputDirectory       = $OutputDirectory
-            NuGet                 = $nuget
         }
         New-Package @params | Out-Host
     }

@@ -50,30 +50,31 @@ function Get-NugetPackage {
     | Select-Object -Property "@id" -ExpandProperty "@id"
 
     $file = "$($PackageName).$($PackageVersion)"
-    $zip = "$($file).zip"
 
+    $zipName = $file
+    
+    if($ExcludeVersion) {
+        $zipName = $PackageName
+    }
+    
     New-Item -Path $OutputDirectory -Force -ItemType Directory | Out-Null
 
     Push-Location $OutputDirectory
 
-    if ($null -ne (Get-ChildItem $file -ErrorAction SilentlyContinue)) {
+    if ($null -ne (Get-ChildItem $zipName -ErrorAction SilentlyContinue)) {
         # Already exists, don't re-download
         Pop-Location
-        return "$($OutputDirectory)/$($file)"
+        return "$($OutputDirectory)/$($zipName)"
     }
 
     $lowerId = $PackageName.ToLower()
 
     try {
-        Invoke-RestMethod "$($packageService)$($lowerId)/$($PackageVersion)/$($file).nupkg" -OutFile $zip
+        Invoke-RestMethod "$($packageService)$($lowerId)/$($PackageVersion)/$($file).nupkg" -OutFile "$($zip).zip"
 
-        if($ExcludeVersion) {
-            $zip = Move-Item -Path $zip -Destination "$($zip.Split($PackageVersion)[0].TrimEnd('.')).zip" -PassThru | Select-Object -ExpandProperty PSChildName
-        }
+        Expand-Archive "$($zip).zip" -Force
 
-        Expand-Archive $zip -Force
-
-        Remove-Item $zip
+        Remove-Item "$($zip).zip"
     }
     catch {
         throw $_
@@ -82,7 +83,7 @@ function Get-NugetPackage {
         Pop-Location
     }
 
-    return "$($OutputDirectory)/$($zip.TrimEnd(".zip"))"
+    return "$($OutputDirectory)/$($zipName)"
 }
 
 $exports = @(

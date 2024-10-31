@@ -120,7 +120,7 @@ function Get-Plugins([hashtable] $Settings) {
         $sourcePath = Join-Path $folder $newExtensionFolderName
         
         if (Test-Path $sourcePath) {
-            Remove-Item $sourcePath -Recurse 
+            Remove-Item $sourcePath -Recurse -Force
         }
 
         Rename-Item -Path $extensionPath -NewName $newExtensionFolderName -Force

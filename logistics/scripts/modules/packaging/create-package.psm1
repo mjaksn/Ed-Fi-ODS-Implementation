@@ -83,7 +83,6 @@ function Invoke-CreatePackage {
         PackageDefinitionFile = $PackageDefinitionFile
         Version               = $Version
         OutputDirectory       = $OutputDirectory
-        NuGet                 = $nuget
         Verbose               = $verbose
         Properties            = $Properties
     }
@@ -107,7 +106,6 @@ function Invoke-CreatePackage {
             PackageFile = (Get-ChildItem "$OutputDirectory/$packageId*.$Version.nupkg").FullName
             Source      = $Source
             ApiKey      = $ApiKey
-            NuGet       = $nuget
             Verbose     = $verbose
         }
         Publish-PrereleasePackage @parameters
@@ -139,9 +137,9 @@ function New-Package {
     )
 
     $parameters = @(
-        "-p:NuspecFile=", $PackageDefinitionFile,
-        "-p:PackageVersion", $Version,
-        "-output", $OutputDirectory
+        "-p:NuspecFile=", $PackageDefinitionFile.TrimStart(' '),
+        "-p:PackageVersion=", $Version,
+        "--output", $OutputDirectory
         "--no-build"
     )
 
@@ -159,7 +157,9 @@ function New-Package {
         $parameters += "detailed"
     }
 
-    Write-Host dotnet pack @parameters -ForegroundColor Magenta
+    $projectDir = "$(Get-ChildItem $PackageDefinitionFile | Select-Object -ExpandProperty DirectoryName)/../../../../../"
+
+    Write-Host dotnet pack $projectDir @parameters -ForegroundColor Magenta
     # Write-Host $NuGet @parameters -ForegroundColor Magenta
     # if(Get-isWindows){
     #     & $NuGet @parameters
