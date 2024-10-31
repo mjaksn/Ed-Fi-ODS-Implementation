@@ -136,7 +136,7 @@ function New-Package {
         $OutputDirectory
     )
 
-    Get-Content $PackageDefinitionFile | ForEach-Object { $_ -replace "<version>0.0.0</version>", "<version>$($Version)</version>" } | set-content $PackageDefinitionFile
+    Get-Content $PackageDefinitionFile -ReadCount 10000 | ForEach-Object { $_ -replace "<version>0.0.0</version>", "<version>$($Version)</version>" } | set-content $PackageDefinitionFile
 
     $parameters = @(
         "-p:NuspecFile=$($PackageDefinitionFile)",
@@ -164,7 +164,10 @@ function New-Package {
 
     Write-Host dotnet pack $projectDir @parameters -ForegroundColor Magenta
 
-    & dotnet new classlib
+    if(-not (Test-Path "$(Get-RepositoryResolvedPath)/Ed-Fi-ODS-Implementation.csproj" -PathType Leaf)) {
+        & dotnet new classlib
+    }
+    
     & dotnet pack @parameters 
     # Write-Host $NuGet @parameters -ForegroundColor Magenta
     # if(Get-isWindows){
