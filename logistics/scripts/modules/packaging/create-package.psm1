@@ -136,9 +136,11 @@ function New-Package {
         $OutputDirectory
     )
 
+    Get-Content $PackageDefinitionFile | ForEach-Object { $_ -replace "<version>0.0.0</version>", "<version>$($Version)</version>" } | set-content $PackageDefinitionFile
+
     $parameters = @(
-        "-p:NuspecFile=", $PackageDefinitionFile.TrimStart(' '),
-        "-p:PackageVersion=", $Version,
+        "-p:NuspecFile=$($PackageDefinitionFile)",
+        "-p:Version=$($Version)",
         "--output", $OutputDirectory
         "--no-build"
     )
@@ -149,7 +151,8 @@ function New-Package {
     }
 
     foreach ($prop in $Properties) {
-        $parameters += "-p:$($prop)"
+        $splitProp = $prop.Split('=');
+        $parameters += "-p:$($splitProp[0])=""$($splitProp[1])"""
     }
 
     if ($Verbose) {
@@ -157,9 +160,12 @@ function New-Package {
         $parameters += "detailed"
     }
 
-    $projectDir = "$(Get-ChildItem $PackageDefinitionFile | Select-Object -ExpandProperty DirectoryName)/../../../../../"
+   # $projectDir = "$(Get-ChildItem $PackageDefinitionFile | Select-Object -ExpandProperty DirectoryName)/../../../../"
 
     Write-Host dotnet pack $projectDir @parameters -ForegroundColor Magenta
+
+    & dotnet new classlib
+    & dotnet pack @parameters 
     # Write-Host $NuGet @parameters -ForegroundColor Magenta
     # if(Get-isWindows){
     #     & $NuGet @parameters
@@ -196,12 +202,12 @@ function Publish-PrereleasePackage {
         $parameters += "detailed"
     }
 
-    Write-Host $NuGet @parameters -ForegroundColor Magenta
-    if(Get-isWindows){
-        & $NuGet @parameters
-    }else {
-        mono $NuGet @parameters
-    }
+    # Write-Host $NuGet @parameters -ForegroundColor Magenta
+    # if(Get-isWindows){
+    #     & $NuGet @parameters
+    # }else {
+    #     mono $NuGet @parameters
+    # }
 }
 
 Export-ModuleMember -Function Invoke-CreatePackage, New-Package
