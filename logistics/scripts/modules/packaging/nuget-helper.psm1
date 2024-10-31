@@ -6,55 +6,6 @@
 & "$PSScriptRoot/../../../../logistics/scripts/modules/load-path-resolver.ps1"
 Import-Module -Force -Scope Global (Get-RepositoryResolvedPath "logistics/scripts/modules/utility/cross-platform.psm1")
 
-function Install-NuGetCli {
-    <#
-    .SYNOPSIS
-        Installs the latest version of the NuGet command line executable
-
-    .DESCRIPTION
-        Installs the latest version of the NuGet command line executable
-
-    .PARAMETER toolsPath
-        The path to store nuget.exe to
-
-    .PARAMETER sourceNuGetExe
-        Web location to the nuget file. Defaulted to the version 5.3.1.0 of nuget.exe.
-    #>
-    [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory = $true)]
-        [string] $ToolsPath,
-
-        [string] $sourceNuGetExe = "https://dist.nuget.org/win-x86-commandline/v5.3.1/nuget.exe"
-    )
-
-    if (-not $(Test-Path $ToolsPath)) {
-        mkdir $ToolsPath | Out-Null
-    }
-
-    $nuget = (Join-Path $ToolsPath "nuget.exe")
-
-    if (-not $(Test-Path $nuget)) {
-        Write-Host "Downloading nuget.exe official distribution from " $sourceNuGetExe
-        Invoke-WebRequest $sourceNuGetExe -OutFile $nuget
-    }
-    else {
-        $info = Get-Command $nuget
-
-        if ("5.3.1.0" -ne $info.Version.ToString()) {
-            Write-Host "Updating nuget.exe official distribution from " $sourceNuGetExe
-            Invoke-WebRequest $sourceNuGetExe -OutFile $nuget
-        }
-    }
-
-    # Add the tools directory to the path if not already there
-    if (-not ($ENV:PATH.Contains($ToolsPath))) {
-        $ENV:PATH = "$ToolsPath$([IO.Path]::PathSeparator)$ENV:PATH"
-    }
-
-    return $nuget
-}
-
 <#
 .SYNOPSIS
     Downloads and extracts the latest compatible version of a NuGet package.

@@ -78,8 +78,6 @@ function Invoke-CreatePackage {
 
     $verbose = $PSCmdlet.MyInvocation.BoundParameters["Verbose"]
 
-    $nuget = Install-NuGetCli -ToolsPath $ToolsPath
-
     # Build release
     $parameters = @{
         PackageDefinitionFile = $PackageDefinitionFile
@@ -137,40 +135,37 @@ function New-Package {
 
         [string]
         [Parameter(Mandatory = $true)]
-        $OutputDirectory,
-
-        [string]
-        [Parameter(Mandatory = $true)]
-        $NuGet
+        $OutputDirectory
     )
 
     $parameters = @(
-        "pack", $PackageDefinitionFile,
-        "-Version", $Version,
-        "-OutputDirectory", $OutputDirectory
+        "-p:NuspecFile=", $PackageDefinitionFile,
+        "-p:PackageVersion", $Version,
+        "-output", $OutputDirectory
+        "--no-build"
     )
 
     if ($Suffix) {
-        $parameters += "-Suffix"
+        $parameters += "--version-suffix"
         $parameters += $Suffix
     }
 
-    if ($Properties.Count -gt 0) {
-        $parameters += "-Properties"
-        $parameters += $Properties -join ';'
+    foreach ($prop in $Properties) {
+        $parameters += "-p:$($prop)"
     }
 
     if ($Verbose) {
-        $parameters += "-Verbosity"
+        $parameters += "--verbosity"
         $parameters += "detailed"
     }
 
-    Write-Host $NuGet @parameters -ForegroundColor Magenta
-    if(Get-isWindows){
-        & $NuGet @parameters
-    }else {
-        mono $NuGet @parameters
-    }
+    Write-Host dotnet pack @parameters -ForegroundColor Magenta
+    # Write-Host $NuGet @parameters -ForegroundColor Magenta
+    # if(Get-isWindows){
+    #     & $NuGet @parameters
+    # }else {
+    #     mono $NuGet @parameters
+    # }
 }
 
 
