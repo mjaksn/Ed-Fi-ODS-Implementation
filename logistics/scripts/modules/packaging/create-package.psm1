@@ -164,11 +164,17 @@ function New-Package {
 
     Write-Host dotnet pack $projectDir @parameters -ForegroundColor Magenta
 
-    if(-not (Test-Path "$(Get-RepositoryResolvedPath)/Ed-Fi-ODS-Implementation.csproj" -PathType Leaf)) {
-        & dotnet new classlib
-    }
-    
+    & dotnet new classlib
+
     & dotnet pack @parameters 
+
+    try {
+        Remove-Item -Path "./Class1.cs" -Recurse -Force | Out-Null
+        Remove-Item -Path "./Ed-Fi-ODS-Implementation.csproj" -Recurse -Force | Out-Null
+        Remove-Item -Path "./bin" -Recurse -Force | Out-Null
+        Remove-Item -Path "./obj" -Recurse -Force | Out-Null
+    } catch { }
+
     # Write-Host $NuGet @parameters -ForegroundColor Magenta
     # if(Get-isWindows){
     #     & $NuGet @parameters
