@@ -186,7 +186,7 @@ function Remove-Plugins([hashtable] $Settings) {
     if (-not (Test-Path $folder)) { return }
 
     Write-Host $folder
-    Get-ChildItem -Path $folder -Directory -Recurse | Remove-Item -Recurse
+    Get-ChildItem -Path $folder -Directory -Recurse | Remove-Item -Recurse -Force
 }
 
 function Get-PluginScriptsForPackaging([hashtable] $Settings) {
